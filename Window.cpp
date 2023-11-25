@@ -1,4 +1,7 @@
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "Window.h"
 #include <iostream>
 
@@ -47,6 +50,13 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
         std::cout << "GLEW Initialization Successful\n";
     }
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
 }
 
 bool Window::Update() {
@@ -56,7 +66,12 @@ bool Window::Update() {
         return true;
     }
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwDestroyWindow(window);
+
     return false;
 }
 

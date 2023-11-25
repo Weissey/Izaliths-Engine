@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -104,14 +104,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\aless\source\lib-vc2022\GLEW;C:\Users\aless\source\lib-vc2022\GLFW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\aless\source\lib-vc2022\ImGUI;C:\Users\aless\source\lib-vc2022\GLEW;C:\Users\aless\source\lib-vc2022\GLFW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\aless\source\lib-vc2022\GLEW\Dependencies\x64;C:\Users\aless\source\lib-vc2022\GLFW\Dependencies;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -131,11 +133,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui.cpp" />
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_demo.cpp" />
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_tables.cpp" />
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imconfig.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_glfw.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_internal.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_rectpack.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_textedit.h" />
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_truetype.h" />
+    <ClInclude Include="Maths.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="basic.frag" />
+    <None Include="basic.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

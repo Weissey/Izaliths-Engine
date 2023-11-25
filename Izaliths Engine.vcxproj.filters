@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\imgui">
+      <UniqueIdentifier>{d083dad1-885b-4fc6-8a30-6cb5e2c5c7f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\imgui">
+      <UniqueIdentifier>{d96b3569-348b-4036-96a8-12995c5cc392}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -21,10 +27,87 @@
     <ClCompile Include="Window.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_draw.cpp">
+      <Filter>Resource Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_glfw.cpp">
+      <Filter>Resource Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_opengl3.cpp">
+      <Filter>Resource Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_tables.cpp">
+      <Filter>Resource Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_widgets.cpp">
+      <Filter>Resource Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui.cpp">
+      <Filter>Resource Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_demo.cpp">
+      <Filter>Resource Files\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="Maths.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_opengl3.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_internal.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_rectpack.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_textedit.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_truetype.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imconfig.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_glfw.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_opengl3_loader.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="basic.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="basic.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
