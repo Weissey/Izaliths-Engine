@@ -7,9 +7,7 @@
 
 Renderer::Renderer() { }
 
-void Renderer::drawTriangle(int x, int y) {
-
-    pos.set(-0.8f, 1.0f, 0.0f);
+void Renderer::start() {
 
     const size_t MaxQuadCount = 1000;
     const size_t MaxVertexCount = MaxQuadCount * 4;
@@ -54,24 +52,10 @@ void Renderer::drawTriangle(int x, int y) {
 
 
 void Renderer::render() {
-
-    ImguiCode();
-
-
     indexCount = 0;
-    std::array<Vertex, 1000> vertices;
-    Vertex* buffer = vertices.data();
-
-    for (float y = -1.0f; y < 0.5; y += 0.5f)
-    {
-        for (float x = -1.0f; x < 0.5; x += 0.5f) {
-            buffer = CreateSquare(buffer, x, y);
-            indexCount += 6;
-        }
-    }
-
-    buffer = CreateSquare(buffer, pos.x, pos.y);
-    indexCount += 6;
+    ImguiCode();
+    buffer = vertices.data();
+    CreateSquare(0, 0); //here
 
     glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
@@ -81,9 +65,9 @@ void Renderer::render() {
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 }
 
-Vertex* Renderer::CreateSquare(Vertex* buffer, float x, float y) {
+void Renderer::CreateSquare(float x, float y) {
     float size = 0.5f;
-    
+
     buffer->position.set(x, y, 0.0f);
     buffer->color.set(1.0f, 1.0f, 0.0f, 1.0f);
     buffer++;
@@ -100,7 +84,7 @@ Vertex* Renderer::CreateSquare(Vertex* buffer, float x, float y) {
     buffer->color.set(1.0f, 1.0f, 1.0f, 1.0f);
     buffer++;
 
-    return buffer;
+    indexCount += 6;
 }
 
 void Renderer::ImguiCode() {
@@ -109,8 +93,8 @@ void Renderer::ImguiCode() {
     ImGui::NewFrame();
 
     ImGui::Begin("Test");
-    ImGui::DragFloat("po1", &pos.x, 0.01f, -5.0f, 5.5f);
-    ImGui::DragFloat("po", &pos.y, 0.01f, -5.0f, 5.5f);
+    /*ImGui::DragFloat("po1", &pos.x, 0.01f, -5.0f, 5.5f);
+    ImGui::DragFloat("po", &pos.y, 0.01f, -5.0f, 5.5f);*/
     ImGui::End();
 
     ImGui::Render();

@@ -15,21 +15,22 @@ struct Vertex {
 class Renderer {
 
 public:
+	void start();
 
+public:
 	const size_t quadcount = 10000;
 	const size_t vertcount = quadcount * 4;
 	const size_t indexcount = quadcount * 6;
 
 	uint32_t indexCount;
+	std::array<Vertex, 1000> vertices;
+	Vertex* buffer;
 
-	static Vertex* CreateSquare(Vertex* buffer, float x, float y);
+	void CreateSquare(float x, float y);
 
 	Renderer();
 	Shader* m_Shader;
-	void drawTriangle(int x, int y);
 	void render();
-	Vec3<float> pos;
-
 	
 
 private:

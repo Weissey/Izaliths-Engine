@@ -63,7 +63,7 @@ int main() {
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
-    renderer.drawTriangle(45, 45);
+    renderer.start();
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
