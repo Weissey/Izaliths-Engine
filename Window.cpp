@@ -50,6 +50,15 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
         std::cout << "GLEW Initialization Successful\n";
     }
 
+    // input //
+    for (int i = 0; i < MAX_KEYS; i++) {
+        m_Keys[i] = false;
+    }
+
+    for (int i = 0; i < MAX_BUTTONS; i++) {
+        m_MouseButtons[i] = false;
+    }
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -78,4 +87,22 @@ bool Window::Update() {
 void Window::render() {
     glfwPollEvents();
     glfwSwapBuffers(window);
+}
+
+int Window::g_width() {
+    return this->width;
+}
+
+int Window::g_height() {
+    return this->height;
+}
+
+Vec2<float> Window::mPos() {
+    Vec2<double> pos;
+    glfwGetCursorPos(window, &pos.x, &pos.y);
+    return Vec2<float>(pos.x, pos.y);
+}
+
+bool Window::key(int key) {
+    return glfwGetKey(window, key) == GLFW_PRESS;
 }

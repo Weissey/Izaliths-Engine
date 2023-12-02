@@ -5,14 +5,16 @@
 #include <iostream>
 
 
+
 Renderer::Renderer() { }
 
 void Renderer::start() {
 
-    const size_t MaxQuadCount = 1000;
+    const size_t MaxQuadCount = 10000;
     const size_t MaxVertexCount = MaxQuadCount * 4;
     const size_t MaxIndexCount = MaxQuadCount * 6;
 
+    vertices = std::array<Vertex, 10000>();
     m_Shader = Shader::createShader("basic.vert", "basic.frag");
 
     glCreateVertexArrays(1, &m_SpriteVA);
@@ -50,12 +52,25 @@ void Renderer::start() {
 
 }
 
+Sprite* Renderer::CreateSprite(Vec3<float> position, Vec2<float> size, Vec4<float> color) {
+    Sprite* p_sprite = new Sprite(position, size, color);
+    spriteList.push_back(p_sprite);
+    return p_sprite;
+}
+
 
 void Renderer::render() {
     indexCount = 0;
-    ImguiCode();
+    //ImguiCode();
     buffer = vertices.data();
-    CreateSquare(0, 0); //here
+
+
+    for (auto i = 0; i < spriteList.size(); i++)
+    {
+        addBuffers(spriteList[i]);
+    }
+
+    //spriteList[0].m_position.set(x, 0.0f, 0.0f);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
@@ -63,6 +78,7 @@ void Renderer::render() {
     glUseProgram(m_Shader->GetRendererID());
     glBindVertexArray(m_SpriteVA);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
 }
 
 void Renderer::CreateSquare(float x, float y) {
@@ -87,14 +103,35 @@ void Renderer::CreateSquare(float x, float y) {
     indexCount += 6;
 }
 
+
+void Renderer::addBuffers(const Sprite* sprite) {
+
+    for (size_t i = 0; i < sprite->vertices.size(); i += 3) {
+
+        buffer->position.set(
+            sprite->vertices[i] * (sprite->m_size.x / 2) + sprite->m_position.x,
+            sprite->vertices[i + 1] * (sprite->m_size.y / 2) + sprite->m_position.y,
+            sprite->vertices[i + 2] + sprite->m_position.z);
+
+        buffer->color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
+        buffer++;
+    }
+    indexCount += 6;
+}
+
+void Renderer::setUniformMat4(const GLchar* name, const mat4& matrix)
+{
+    glUniformMatrix4fv(glGetUniformLocation(m_Shader->GetRendererID(), name), 1, GL_FALSE, matrix.elements);
+}
+
 void Renderer::ImguiCode() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     ImGui::Begin("Test");
-    /*ImGui::DragFloat("po1", &pos.x, 0.01f, -5.0f, 5.5f);
-    ImGui::DragFloat("po", &pos.y, 0.01f, -5.0f, 5.5f);*/
+    ImGui::DragFloat("x", &spriteList[1]->m_position.x, 1.0f, -1200.0f, 1200.0f);
+    ImGui::DragFloat("y", &spriteList[1]->m_position.y, 1.0f, -1200.0f, 1200.0f);
     ImGui::End();
 
     ImGui::Render();

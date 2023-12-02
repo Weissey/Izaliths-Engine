@@ -3,3 +3,5 @@
 
 
 std::string file_to_char(const std::string& filepath);
+
+float toRadians(float degrees);

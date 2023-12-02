@@ -23,3 +23,10 @@ std::string file_to_char(const std::string& filepath) {
 	return result;
 	
 }
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+float toRadians(float degrees)
+{
+	return degrees * (M_PI / 180.0f);
+}
