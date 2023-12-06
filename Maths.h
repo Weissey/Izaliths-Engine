@@ -41,6 +41,20 @@ Vec3<T> operator*(const Vec3<T>& left, const Vec3<T>& right)
     return result;
 }
 
+template <typename T>
+bool operator==(const Vec3<T>& left, const Vec3<T>& right)
+{
+    if (left.x == right.x) {
+        if (left.y == right.y) {
+            if (left.z == right.z) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 
 
 template <typename T>

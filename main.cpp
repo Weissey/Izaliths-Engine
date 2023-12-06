@@ -37,52 +37,96 @@ int main() {
     double lastTime = glfwGetTime();
     int nbFrames = 0;
 
-    Vec3<float> pos(600.0f, 600.0f, 0.0f);
-    Sprite* player = renderer.CreateSprite(pos, Vec2<float>(100.0f, 100.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
+    Sprite* player = renderer.CreateSprite(Vec3<float>(600.0f, 600.0f, 0.0f), Vec2<float>(100.0f, 100.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
 
-    //Sprite* player2 = renderer.CreateSprite(Vec3<float>(300.0f, 300.0f, 0.0f), Vec2<float>(100.0f, 100.0f), Vec4<float>(1.0f, 0.0f, 1.0f, 1.0f));
+    Sprite* g_collider = renderer.CreateSprite(Vec3<float>(0.0f, 0.0f, 0.0f), Vec2<float>(100.0f, 10.0f), Vec4<float>(1.0f, 0.0f, 1.0f, 1.0f));
+
+    Sprite* h_collider = renderer.CreateSprite(Vec3<float>(0.0f, 0.0f, 0.0f), Vec2<float>(100.0f, 10.0f), Vec4<float>(1.0f, 0.0f, 1.0f, 1.0f));
 
 
+    Sprite* ground = renderer.CreateSprite(Vec3<float>(600.0f, 0.0f, 0.0f), Vec2<float>(1200.0f, 100.0f), Vec4<float>(1.0f, 0.5f, 0.5f, 1.0f));
+
+    Sprite* platforms[7];
+
+    for (size_t i = 0; i < 7; i++)
+    {
+        platforms[i] = renderer.CreateSprite(Vec3<float>(50 + (rand() % 1150), 400 + (rand() % 800), 0.0f), Vec2<float>(200.0f, 50.0f), Vec4<float>(1.0f, 0.5f, 0.5f, 1.0f));
+    }
+
+    Vec3<float> velocity(0.0f, 0.0f, 0.0f);
 
     while (window.Update()) {
-        double currentTime = glfwGetTime();
         nbFrames++;
+        renderer.render();
+        renderer.setUniformMat4("pr_matrix", ortho);
 
-        if (currentTime - lastTime >= 1.0) {
+        g_collider->m_position.set(player->m_position.x, player->m_position.y - player->m_size.y / 2 + g_collider->m_size.y / 2, player->m_position.z);
+        h_collider->m_position.set(player->m_position.x, player->m_position.y + player->m_size.y / 2 - g_collider->m_size.y / 2, player->m_position.z);
+
+
+        if (g_collider->isBoxTouching(*ground)) {
+
+            velocity.y = 0.0f;
+        }
+
+        for (size_t i = 0; i < 7; i++)
+        {
+            if (g_collider->isBoxTouching(*platforms[i])) {
+
+                velocity.y = 0.0f;
+            }
+
+            if (h_collider->isBoxTouching(*platforms[i])) {
+
+                velocity.y += -700.8f;
+            }
+        }
+
+
+        
+        if (window.key(GLFW_KEY_A)) {
+            velocity.x = -200.0f;
+        }
+        else if (window.key(GLFW_KEY_D)) {
+            velocity.x = 200.0f;
+        }
+        else {
+            velocity.x = 0.0f;
+        }
+
+        bool grounded = false;
+
+        for (size_t i = 3; i < renderer.spriteList.size(); i++)
+        {
+            if (player->isBoxTouching(*renderer.spriteList[i])) {
+                grounded = true;
+            }
+        }
+        
+        if (window.key(GLFW_KEY_W) && grounded) {
+            std::cout << "t" << std::endl;
+            velocity.y = 900.0f;
+        }
+
+
+        player->m_position.y += velocity.y * window.deltaTime();
+        player->m_position.x += velocity.x * window.deltaTime();
+
+        velocity.y += -700.8f * window.deltaTime();
+
+        if (window.currentTime - lastTime >= 1.0) {
             // Calculate frames per second and reset timer
-            double fps = double(nbFrames) / (currentTime - lastTime);
+            double fps = double(nbFrames) / (window.currentTime - lastTime);
             printf("%f fps\n", fps);
 
             nbFrames = 0;
             lastTime += 1.0;
         }
 
-        renderer.render();
-
-        renderer.setUniformMat4("pr_matrix", ortho);
-
-        if (window.key(GLFW_KEY_W)) {
-            std::cout << "W pressed" << std::endl;
-            pos.y++;
-        }
-        if (window.key(GLFW_KEY_A)) {
-            std::cout << "A pressed" << std::endl;
-            pos.x--;
-        }
-        if (window.key(GLFW_KEY_S)) {
-            std::cout << "S pressed" << std::endl;
-            pos.y--;
-        }
-        if (window.key(GLFW_KEY_D)) {
-            std::cout << "D pressed" << std::endl;
-            pos.x++;
-        }
-        player->m_position.set(pos.x, pos.y, pos.z);
-
-
         //renderer.spriteList[0]->m_position.set(renderer.x, 0.0f, 0.0f);
         //renderer.setUniformMat4("ml_matrix", mat4::translation(Vec3<float>(renderer.y, 0, 0)));
         //player2->m_position.set(renderer.x, player2->m_position.y, 0.0f);
+
 
         window.render();
     }

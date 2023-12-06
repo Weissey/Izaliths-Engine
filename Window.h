@@ -16,6 +16,12 @@ public:
 	int g_width();
 	int g_height();
 
+	float deltaTime();
+
+	float currentTime = 0.0f;
+	float lastTime = glfwGetTime();
+	float f_deltaTime;
+
 	Vec2<float> mPos();
 
 

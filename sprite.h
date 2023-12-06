@@ -51,4 +51,23 @@ static struct Sprite {
 		return false;
 	};
 
+	Vec4<float> getBounds() const {
+		return Vec4<float>(m_position.x - m_size.x / 2, m_position.x + m_size.x / 2, m_position.y - m_size.y / 2, m_position.y + m_size.y / 2);
+	}
+
+	bool isBoxTouching(const Sprite& sprite) {
+		
+		Vec4<float> m = this->getBounds();
+		Vec4<float> s = sprite.getBounds();
+
+		if (	m.x <= s.y	&&
+				m.y >= s.x	&&
+				m.z <= s.c	&&
+				m.c >= s.z	) {
+			return true;
+		}
+
+		return false;
+	}
+
 };

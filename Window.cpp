@@ -68,9 +68,18 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
 
 }
 
+float Window::deltaTime() {
+
+    return f_deltaTime;
+}
+
 bool Window::Update() {
 
+    f_deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+
     if (!glfwWindowShouldClose(window)) {
+        currentTime = glfwGetTime();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         return true;
     }

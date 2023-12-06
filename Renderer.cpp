@@ -61,7 +61,7 @@ Sprite* Renderer::CreateSprite(Vec3<float> position, Vec2<float> size, Vec4<floa
 
 void Renderer::render() {
     indexCount = 0;
-    //ImguiCode();
+    ImguiCode();
     buffer = vertices.data();
 
 
@@ -130,8 +130,8 @@ void Renderer::ImguiCode() {
     ImGui::NewFrame();
 
     ImGui::Begin("Test");
-    ImGui::DragFloat("x", &spriteList[1]->m_position.x, 1.0f, -1200.0f, 1200.0f);
-    ImGui::DragFloat("y", &spriteList[1]->m_position.y, 1.0f, -1200.0f, 1200.0f);
+    ImGui::DragFloat("x", &spriteList[0]->m_position.x, 1.0f, -1200.0f, 1200.0f);
+    ImGui::DragFloat("y", &spriteList[0]->m_position.y, 1.0f, -1200.0f, 1200.0f);
     ImGui::End();
 
     ImGui::Render();
