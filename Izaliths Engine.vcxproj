@@ -143,6 +143,7 @@
     <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_widgets.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_rectpack.h" />
     <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_textedit.h" />
     <ClInclude Include="..\..\..\lib-vc2022\ImGUI\imstb_truetype.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="Maths.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />

@@ -59,6 +59,14 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
         m_MouseButtons[i] = false;
     }
 
+
+    glViewport(0, 0, width, height);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    //glDepthMask(GL_FALSE);*/
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -98,11 +106,11 @@ void Window::render() {
     glfwSwapBuffers(window);
 }
 
-int Window::g_width() {
+float Window::g_width() {
     return this->width;
 }
 
-int Window::g_height() {
+float Window::g_height() {
     return this->height;
 }
 
@@ -112,6 +120,9 @@ Vec2<float> Window::mPos() {
     return Vec2<float>(pos.x, pos.y);
 }
 
-bool Window::key(int key) {
-    return glfwGetKey(window, key) == GLFW_PRESS;
+bool Window::key(int key, bool keyboard) {
+    if (keyboard) {
+        return glfwGetKey(window, key) == GLFW_PRESS;
+    }
+    return glfwGetMouseButton(window, key) == GLFW_PRESS;
 }

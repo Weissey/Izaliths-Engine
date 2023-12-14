@@ -5,6 +5,7 @@
 #include <glfw3.h>
 #include "Window.h"
 #include "Renderer.h"
+#include "camera.h"
 #include <vector>
 
 
@@ -18,7 +19,7 @@ void GLAPIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 
 int main() {
 
-    Window window(1200, 1200, "Oolong", false);
+    Window window(2400, 1200, "Oolong", false);
 
     Renderer renderer;
     renderer.start();
@@ -29,90 +30,75 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
 
-    //mat4 perspective = mat4::perspective(45.0f, 16 / 9.0f, 0.1f, 100.0f);
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(debugCallback, nullptr);
+    mat4 perspective = mat4::perspective(45.0f, 1200.0f / 900.0f, 0.1f, 100.0f);
+    //glEnable(GL_DEBUG_OUTPUT);
+    //glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    //glDebugMessageCallback(debugCallback, nullptr);
 
     double lastTime = glfwGetTime();
     int nbFrames = 0;
 
-    Sprite* player = renderer.CreateSprite(Vec3<float>(600.0f, 600.0f, 0.0f), Vec2<float>(100.0f, 100.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
+    Vec3<float> camera_pos(0, 0, 0);
+    Vec3<float> camera_look(0, 0, 0);
 
-    Sprite* g_collider = renderer.CreateSprite(Vec3<float>(0.0f, 0.0f, 0.0f), Vec2<float>(100.0f, 10.0f), Vec4<float>(1.0f, 0.0f, 1.0f, 1.0f));
+    float movespeed = 15.0f;
 
-    Sprite* h_collider = renderer.CreateSprite(Vec3<float>(0.0f, 0.0f, 0.0f), Vec2<float>(100.0f, 10.0f), Vec4<float>(1.0f, 0.0f, 1.0f, 1.0f));
+    float lookspeed = 5.0f;
 
+    Sprite* ground1 = renderer.CreateSprite("first", Vec3<float>(15.0f, -7.0f, -40.0f), Vec3<float>(5.0f, 5.0f, 5.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
+    Sprite* ground2 = renderer.CreateSprite("first", Vec3<float>(-15.0f, -11.0f, -40.0f), Vec3<float>(5.0f, 5.0f, 5.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
+    Sprite* ground3 = renderer.CreateSprite("first", Vec3<float>(-4.0f, -10.0f, -40.0f), Vec3<float>(5.0f, 5.0f, 5.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
 
-    Sprite* ground = renderer.CreateSprite(Vec3<float>(600.0f, 0.0f, 0.0f), Vec2<float>(1200.0f, 100.0f), Vec4<float>(1.0f, 0.5f, 0.5f, 1.0f));
+    Sprite* ground4 = renderer.CreateSprite("first", Vec3<float>(-6.0f, 7.0f, -40.0f), Vec3<float>(5.0f, 5.0f, 5.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
 
-    Sprite* platforms[7];
+    Sprite* ground5 = renderer.CreateSprite("first", Vec3<float>(12.0f, 2.0f, -40.0f), Vec3<float>(5.0f, 5.0f, 5.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
 
-    for (size_t i = 0; i < 7; i++)
-    {
-        platforms[i] = renderer.CreateSprite(Vec3<float>(50 + (rand() % 1150), 400 + (rand() % 800), 0.0f), Vec2<float>(200.0f, 50.0f), Vec4<float>(1.0f, 0.5f, 0.5f, 1.0f));
-    }
-
-    Vec3<float> velocity(0.0f, 0.0f, 0.0f);
 
     while (window.Update()) {
         nbFrames++;
         renderer.render();
-        renderer.setUniformMat4("pr_matrix", ortho);
 
-        g_collider->m_position.set(player->m_position.x, player->m_position.y - player->m_size.y / 2 + g_collider->m_size.y / 2, player->m_position.z);
-        h_collider->m_position.set(player->m_position.x, player->m_position.y + player->m_size.y / 2 - g_collider->m_size.y / 2, player->m_position.z);
+        ground1->rotate(Vec3<float>(window.currentTime * -25.0f, 0, 0));
+        ground2->rotate(Vec3<float>(window.currentTime * 25.0f, 0, 0));
+        ground3->rotate(Vec3<float>(window.currentTime * -25.0f, 0, 0));
+
+        ground4->rotate(Vec3<float>(window.currentTime * -25.0f, 0, 0));
+        ground5->rotate(Vec3<float>(window.currentTime * -25.0f, 0, 0));
 
 
-        if (g_collider->isBoxTouching(*ground)) {
-
-            velocity.y = 0.0f;
+        if (window.key(GLFW_KEY_W)) {
+            camera_pos.z += movespeed * window.deltaTime();
         }
 
-        for (size_t i = 0; i < 7; i++)
-        {
-            if (g_collider->isBoxTouching(*platforms[i])) {
-
-                velocity.y = 0.0f;
-            }
-
-            if (h_collider->isBoxTouching(*platforms[i])) {
-
-                velocity.y += -700.8f;
-            }
-        }
-
-
-        
         if (window.key(GLFW_KEY_A)) {
-            velocity.x = -200.0f;
-        }
-        else if (window.key(GLFW_KEY_D)) {
-            velocity.x = 200.0f;
-        }
-        else {
-            velocity.x = 0.0f;
+            camera_pos.x += movespeed * window.deltaTime();
         }
 
-        bool grounded = false;
-
-        for (size_t i = 3; i < renderer.spriteList.size(); i++)
-        {
-            if (player->isBoxTouching(*renderer.spriteList[i])) {
-                grounded = true;
-            }
-        }
-        
-        if (window.key(GLFW_KEY_W) && grounded) {
-            std::cout << "t" << std::endl;
-            velocity.y = 900.0f;
+        if (window.key(GLFW_KEY_S)) {
+            camera_pos.z -= movespeed * window.deltaTime();
         }
 
+        if (window.key(GLFW_KEY_D)) {
+            camera_pos.x -= movespeed * window.deltaTime();
+        }
 
-        player->m_position.y += velocity.y * window.deltaTime();
-        player->m_position.x += velocity.x * window.deltaTime();
+        if (window.key(GLFW_KEY_LEFT)) {
+            camera_look.y += lookspeed * window.deltaTime();
+        }
 
-        velocity.y += -700.8f * window.deltaTime();
+        if (window.key(GLFW_KEY_RIGHT)) {
+            camera_look.y -= lookspeed * window.deltaTime();
+        }
+
+        if (window.key(GLFW_KEY_UP)) {
+            camera_look.x += lookspeed * window.deltaTime();
+        }
+
+        if (window.key(GLFW_KEY_DOWN)) {
+            camera_look.x -= lookspeed * window.deltaTime();
+        }
+
+        renderer.setUniformMat4("pr_matrix", perspective);
 
         if (window.currentTime - lastTime >= 1.0) {
             // Calculate frames per second and reset timer
@@ -123,12 +109,12 @@ int main() {
             lastTime += 1.0;
         }
 
-        //renderer.spriteList[0]->m_position.set(renderer.x, 0.0f, 0.0f);
-        //renderer.setUniformMat4("ml_matrix", mat4::translation(Vec3<float>(renderer.y, 0, 0)));
-        //player2->m_position.set(renderer.x, player2->m_position.y, 0.0f);
 
+        mat4 sum = mat4::translation(camera_pos) * mat4::rotation(camera_look);
+        renderer.setUniformMat4("vw_matrix", sum);
 
         window.render();
+
     }
 
     return 0;

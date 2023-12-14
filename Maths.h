@@ -1,5 +1,12 @@
 #pragma once
-#include "Utils.h"
+#include <iostream>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+inline float toRadians(float degrees)
+{
+    return degrees * (M_PI / 180.0f);
+}
 
 template <typename T>
 struct Vec2 {
@@ -91,15 +98,18 @@ struct mat4 {
     float elements[16];
 
     mat4();
+
     mat4(float diagonal) {
 
-        for (int i = 0; i < 4 * 4; i++)
+        for (int i = 0; i < 4 * 4; i++) {
             elements[i] = 0.0f;
+        }
 
         elements[0 + 0 * 4] = diagonal;
         elements[1 + 1 * 4] = diagonal;
         elements[2 + 2 * 4] = diagonal;
         elements[3 + 3 * 4] = diagonal;
+
     }
 
     static mat4 identity() {
@@ -129,8 +139,16 @@ struct mat4 {
         return *this;
     }
 
-    friend mat4 operator*(mat4 left, const mat4& right) {
-        return left.multiply(right);
+    mat4 operator*(const mat4& other) const {
+        mat4 result(0.0f);
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                for (int k = 0; k < 4; ++k) {
+                    result.elements[i * 4 + j] += elements[i * 4 + k] * other.elements[k * 4 + j];
+                }
+            }
+        }
+        return result;
     }
 
     mat4& operator*=(const mat4& other) {
@@ -154,22 +172,32 @@ struct mat4 {
     }
 
     static mat4 perspective(float fov, float aspectRatio, float near, float far) {
-        mat4 result(1.0f);
+        mat4 result(1.0f); // Initialize to identity matrix
 
         float q = 1.0f / tan(toRadians(0.5f * fov));
         float a = q / aspectRatio;
-
         float b = (near + far) / (near - far);
         float c = (2.0f * near * far) / (near - far);
 
+        // Set elements of the perspective matrix
         result.elements[0 + 0 * 4] = a;
         result.elements[1 + 1 * 4] = q;
         result.elements[2 + 2 * 4] = b;
         result.elements[3 + 2 * 4] = -1.0f;
         result.elements[2 + 3 * 4] = c;
 
+        // Print the resulting matrix for debugging
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                std::cout << "M[" << i << "][" << j << "] = " << result.elements[i + j * 4] << "\t";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+
         return result;
     }
+
 
     static mat4 translation(const Vec3<float>& translation) {
         mat4 result(1.0f);
@@ -181,29 +209,13 @@ struct mat4 {
         return result;
     }
 
-    static mat4 rotation(float angle, const Vec3<float>& axis) {
+    static mat4 rotation(const Vec3<float>& angle) {
         mat4 result(1.0f);
 
-        float r = toRadians(angle);
-        float c = cos(r);
-        float s = sin(r);
-        float omc = 1.0f - c;
-
-        float x = axis.x;
-        float y = axis.y;
-        float z = axis.z;
-
-        result.elements[0 + 0 * 4] = x * omc + c;
-        result.elements[1 + 0 * 4] = y * x * omc + z * s;
-        result.elements[2 + 0 * 4] = x * z * omc - y * s;
-
-        result.elements[0 + 1 * 4] = x * y * omc - z * s;
-        result.elements[1 + 1 * 4] = y * omc + c;
-        result.elements[2 + 1 * 4] = y * z * omc + x * s;
-
-        result.elements[0 + 2 * 4] = x * z * omc + y * s;
-        result.elements[1 + 2 * 4] = y * z * omc - x * s;
-        result.elements[2 + 2 * 4] = z * omc + c;
+        result.elements[0] = cos(angle.y);
+        result.elements[2] = sin(angle.y);
+        result.elements[8] = -sin(angle.y);
+        result.elements[10] = cos(angle.y);
 
         return result;
     }
@@ -219,3 +231,4 @@ struct mat4 {
     }
 
 };
+

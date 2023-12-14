@@ -13,8 +13,8 @@ public:
 	bool Update();
 	void render();
 
-	int g_width();
-	int g_height();
+	float g_width();
+	float g_height();
 
 	float deltaTime();
 
@@ -25,7 +25,7 @@ public:
 	Vec2<float> mPos();
 
 
-	bool key(int key);
+	bool key(int key, bool keyboard = true);
 private:
 	int width;
 	int height;

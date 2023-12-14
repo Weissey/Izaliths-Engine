@@ -15,16 +15,19 @@ static struct Sprite {
 	std::string name;
 	Vec3<float> m_position;
 	Vec4<float> m_color;
-	Vec2<float> m_size;
+	Vec3<float> m_size;
+	Vec3<float> rotation_euler;
 
 
 	std::vector<float> vertices {};
 
 	std::vector<uint32_t> indices{};
 
-	Sprite(Vec3<float> position, Vec2<float> size, Vec4<float> color)  : m_position(position), m_color(color), m_size(size) {
+	void rotate(Vec3<float> euler) {
+		rotation_euler = euler;
+	}
 
-		name = "sprite";
+	Sprite(Vec3<float> position, Vec3<float> size, Vec4<float> color, std::string name = "sprite") : m_position(position), m_color(color), m_size(size), name(name) {
 
 		vertices = {
 			// Front face
@@ -33,13 +36,48 @@ static struct Sprite {
 			//position.x + size.x, position.y + size.y, position.z, // Bottom right
 			//position.x, position.y + size.y, position.z  // Bottom left
 
-			-1.0f, 1.0f, 0.0f,
-			 1.0f, 1.0f, 0.0f,
-			 1.0f, -1.0f, 0.0f,
-			-1.0f, -1.0f, 0.0f
+			-1.0f, 1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 1.0f,
+
+			1.0f, 1.0f, -1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 1.0f,
+			1.0f, -1.0f, -1.0f
+
 		};
+
+		indices = {
+			0, 1, 3, 2, 3, 0,
+
+			4, 0, 2, 4, 5, 2,
+
+			2, 3, 6, 2, 6, 5,
+
+			1, 3, 7, 3, 6, 7,
+
+			4, 6, 5, 4, 7, 6,
+
+			0, 4, 7, 0, 1, 7
+		};
+
 	
 	};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	bool onClick(float mx, float my) {
 		
