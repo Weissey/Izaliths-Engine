@@ -35,18 +35,41 @@ struct Vec3 {
         this->y = y;
         this->z = z;
     }
+
+    Vec3<T>& operator+=(const Vec3<T>& other) {
+        this->x += other.x;
+        this->y += other.y;
+        this->z += other.z;
+        return *this;
+    }
+
+    Vec3<T>& operator-=(const Vec3<T>& other) {
+        this->x -= other.x;
+        this->y -= other.y;
+        this->z -= other.z;
+        return *this;
+    }
+
+    Vec3<T>& operator*(const Vec3<T>& right)
+    {
+        this->x = this->x * right.x;
+        this->y = this->y * right.y;
+        this->z = this->z * right.z;
+
+        return *this;
+    }
+
+    Vec3<T>& operator*(const float& right)
+    {
+        this->x = right * this->x;
+        this->y = right * this->y;
+        this->z = right * this->z;
+
+        return *this;
+    }
+
 };
 
-template <typename T>
-Vec3<T> operator*(const Vec3<T>& left, const Vec3<T>& right)
-{
-    Vec3<T> result;
-    result.x = left.x * right.x;
-    result.y = left.y * right.y;
-    result.z = left.z * right.z;
-
-    return result;
-}
 
 template <typename T>
 bool operator==(const Vec3<T>& left, const Vec3<T>& right)
@@ -209,13 +232,29 @@ struct mat4 {
         return result;
     }
 
-    static mat4 rotation(const Vec3<float>& angle) {
+    static mat4 rotation(const Vec3<float>& angles) {
         mat4 result(1.0f);
 
-        result.elements[0] = cos(angle.y);
-        result.elements[2] = sin(angle.y);
-        result.elements[8] = -sin(angle.y);
-        result.elements[10] = cos(angle.y);
+        float radX = toRadians(angles.x);
+        float radY = toRadians(angles.y);
+        float radZ = toRadians(angles.z);
+
+        float cx = cos(radX);
+        float sx = sin(radX);
+        float cy = cos(radY);
+        float sy = sin(radY);
+        float cz = cos(radZ);
+        float sz = sin(radZ);
+
+        result.elements[0] = cy * cz + sx * sy * sz;
+        result.elements[1] = cz * sx * sy - cy * sz;
+        result.elements[2] = cx * sy;
+        result.elements[4] = cx * sz;
+        result.elements[5] = cx * cz;
+        result.elements[6] = -sx;
+        result.elements[8] = cy * sx * sz - cz * sy;
+        result.elements[9] = cy * cz * sx + sy * sz;
+        result.elements[10] = cx * cy;
 
         return result;
     }
@@ -232,3 +271,8 @@ struct mat4 {
 
 };
 
+namespace maths {
+    inline const float clamp(float value, float min, float max) {
+        return (value < min) ? min : ((value > max) ? max : value);
+    }
+}

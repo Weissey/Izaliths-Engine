@@ -6,15 +6,13 @@
 
 
 
-Renderer::Renderer() { }
+Renderer::Renderer() {
 
-void Renderer::start() {
+    //vertices = std::array<Vertex, MaxQuadCount>();
+    std::cerr << "Extraction failed.\n";
+    vertices.reserve(MaxQuadCount);
+    std::cerr << "Extraction failed.\n";
 
-    const size_t MaxQuadCount = 1000;
-    const size_t MaxVertexCount = MaxQuadCount * 4;
-    const size_t MaxIndexCount = MaxQuadCount * 6;
-
-    vertices = std::array<Vertex, 1000>();
     m_Shader = Shader::createShader("basic.vert", "basic.frag");
 
     glCreateVertexArrays(1, &m_SpriteVA);
@@ -23,7 +21,7 @@ void Renderer::start() {
     glCreateBuffers(1, &m_SpriteVB);
     glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * MaxVertexCount, nullptr, GL_DYNAMIC_DRAW);
-        
+
     glEnableVertexArrayAttrib(m_SpriteVB, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, position));
 
@@ -33,29 +31,18 @@ void Renderer::start() {
     glCreateBuffers(1, &m_SpriteIB);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_SpriteIB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * MaxIndexCount, nullptr, GL_DYNAMIC_DRAW);
-
-
-    /*uint32_t offset = 0;*/
-
-    /*for (size_t i = 0; i < MaxIndexCount; i += 6)
-    {
-        indices[i + 0] = 0 + offset;
-        indices[i + 1] = 1 + offset;
-        indices[i + 2] = 2 + offset;
-
-        indices[i + 3] = 2 + offset;
-        indices[i + 4] = 3 + offset;
-        indices[i + 5] = 0 + offset;
-
-        offset += 4;
-    }*/
-
 }
 
 Sprite* Renderer::CreateSprite(std::string name, Vec3<float> position, Vec3<float> size, Vec4<float> color) {
-    Sprite* p_sprite = new Sprite(position, size, color, name);
-    spriteList.push_back(p_sprite);
-    return p_sprite;
+    Sprite* sprite = new Sprite(position, size, color, name);
+    spriteList.push_back(sprite);
+    return sprite;
+}
+
+Sprite* Renderer::LoadOBJ(std::string name, Vec3<float> position, Vec3<float> size, const char* filepath) {
+    Sprite* sprite = new Sprite(position, size, Vec4<float>(0, 0, 0, 0), name, filepath);
+    spriteList.push_back(sprite);
+    return sprite;
 }
 
 
@@ -64,7 +51,10 @@ void Renderer::render() {
     vertexCount = 0;
     indexCount = 0;
     //ImguiCode();
-    buffer = vertices.data();
+
+    //buffer = vertices.data();
+
+    vertices.clear();
 
     for (size_t i = 0; i < spriteList.size(); i++)
     {
@@ -72,7 +62,7 @@ void Renderer::render() {
         addBuffers(spriteList[i]);
     }
 
-    //spriteList[0].m_position.set(x, 0.0f, 0.0f);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
@@ -89,51 +79,28 @@ void Renderer::render() {
 
 }
 
-void Renderer::CreateSquare(float x, float y) {
-    float size = 0.5f;
-
-    buffer->position.set(x, y, 0.0f);
-    buffer->color.set(1.0f, 1.0f, 0.0f, 1.0f);
-    buffer++;
-
-    buffer->position.set(x + size, y, 0.0f);
-    buffer->color.set(1.0f, 1.0f, 0.0f, 1.0f);
-    buffer++;
-
-    buffer->position.set(x + size, y + size, 0.0f);
-    buffer->color.set(1.0f, 1.0f, 1.0f, 1.0f);
-    buffer++;
-
-    buffer->position.set(x, y + size, 0.0f);
-    buffer->color.set(1.0f, 1.0f, 1.0f, 1.0f);
-    buffer++;
-
-    indexCount += 6;
-}
-
-
 void Renderer::addBuffers(const Sprite* sprite) {
 
     int offset = vertexCount;
-    std::cout << sprite->name << std::endl;
 
     float color_p = 0.0f;
 
     for (size_t i = 0; i < sprite->vertices.size(); i += 3) {
 
-        Vec3<float> vert(sprite->vertices[i] * (sprite->m_size.x / 2) + sprite->m_position.x,
+       Vec3<float> vert(sprite->vertices[i] * (sprite->m_size.x / 2) + sprite->m_position.x,
             sprite->vertices[i + 1] * (sprite->m_size.y / 2) + sprite->m_position.y,
             sprite->vertices[i + 2] * (sprite->m_size.z / 2) + sprite->m_position.z);
         
         rotateVertex(vert, sprite->m_position, sprite->rotation_euler);
 
-        buffer->position.set(vert.x, vert.y, vert.z);
+        Vertex vertex;
 
-
-        buffer->color.set(color_p, color_p, 0.5f, 1.0f); //
         color_p += i / 36.0f;
 
-        buffer++;
+        vertex.position.set(vert.x, vert.y, vert.z);
+        vertex.color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
+
+        vertices.push_back(vertex);
 
         vertexCount += 1;
     }
@@ -160,10 +127,10 @@ void Renderer::ImguiCode() {
     ImGui::NewFrame();
 
     ImGui::Begin("Test");
-    ImGui::DragFloat("x", &spriteList[0]->m_position.x, 1.0f, -1200.0f, 1200.0f);
-    ImGui::DragFloat("y", &spriteList[0]->m_position.y, 1.0f, -1200.0f, 1200.0f);
-    ImGui::DragFloat("z", &spriteList[0]->m_position.z, 1.0f, -1200.0f, 1200.0f);
-    ImGui::DragFloat("c", &spriteList[0]->m_color.x, 0.1f, 0.0f, 1.0f);
+    ImGui::DragFloat("x pos", &spriteList[2]->rotation_euler.x, 1.0f, -1200.0f, 1200.0f);
+    ImGui::DragFloat("z pos", &spriteList[2]->rotation_euler.z, 0.1f, -1200.0f, 1200.0f);
+    ImGui::DragFloat("yaw", &spriteList[2]->rotation_euler.y, 0.1f, -360.0f, 360.0f);
+
 
     ImGui::End();
 

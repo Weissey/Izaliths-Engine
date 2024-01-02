@@ -8,6 +8,11 @@
 Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen_mode)
     : width(w_width), height(w_height), title(w_title), fullscreen_mode(w_fullscreen_mode) {
 
+
+    for (size_t i = 0; i < MAX_KEYS; i++) { m_Keys[i] = false; }
+
+    for (size_t i = 0; i < MAX_BUTTONS; i++) { m_MouseButtons[i] = false; }
+
     if (!glfwInit()) {
         std::cout << "GFLW Initialization Failed\n";
         glfwTerminate();
@@ -20,6 +25,7 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
 
 
@@ -30,6 +36,7 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
         window = glfwCreateWindow(width, height, title, NULL, NULL);
     }
 
+    glfwMakeContextCurrent(window);
 
     if (!window) {
         std::cout << "Window Initialization Failed\n";
@@ -39,7 +46,6 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
         std::cout << "Window Initialization Successful\n";
     }
 
-    glfwMakeContextCurrent(window);
 
     if (glewInit() != GLEW_OK) {
         std::cout << "GLEW Initialization Failed\n";
@@ -63,9 +69,11 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
     glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+    //glEnable(GL_MULTISAMPLE);
     glDepthFunc(GL_LESS);
 
-    //glDepthMask(GL_FALSE);*/
+    //glDepthMask(GL_FALSE);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -73,6 +81,8 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 }
 
@@ -82,6 +92,8 @@ float Window::deltaTime() {
 }
 
 bool Window::Update() {
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 
     f_deltaTime = currentTime - lastTime;
     lastTime = currentTime;
@@ -102,8 +114,6 @@ bool Window::Update() {
 }
 
 void Window::render() {
-    glfwPollEvents();
-    glfwSwapBuffers(window);
 }
 
 float Window::g_width() {
@@ -120,9 +130,39 @@ Vec2<float> Window::mPos() {
     return Vec2<float>(pos.x, pos.y);
 }
 
-bool Window::key(int key, bool keyboard) {
-    if (keyboard) {
-        return glfwGetKey(window, key) == GLFW_PRESS;
-    }
-    return glfwGetMouseButton(window, key) == GLFW_PRESS;
+void Window::setmPos(Vec2<float> pos) {
+    glfwSetCursorPos(window, pos.x, pos.y);
 }
+
+bool Window::keyDown(int keycode) {
+    
+    m_Keys[keycode] = glfwGetKey(window, keycode) == GLFW_PRESS;
+    //std::cout << "down" << std::endl;
+    return m_Keys[keycode];
+}
+
+bool Window::keyUp(int keycode) {
+    m_Keys[keycode] = glfwGetKey(window, keycode) == GLFW_RELEASE;
+    //std::cout << "up" << std::endl;
+    return m_Keys[keycode];
+}
+
+bool Window::keyPressed(int keycode) { // fix
+
+    if (keycode >= MAX_KEYS)
+        return false;
+
+    if (m_Keys[keycode] || glfwGetKey(window, keycode) == GLFW_PRESS) {
+        m_Keys[keycode] = true;
+
+        if (glfwGetKey(window, keycode) == GLFW_RELEASE) {
+            m_Keys[keycode] = false;
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+//return glfwGetMouseButton(window, key) == GLFW_PRESS;

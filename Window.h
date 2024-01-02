@@ -23,9 +23,12 @@ public:
 	float f_deltaTime;
 
 	Vec2<float> mPos();
+	void setmPos(Vec2<float> pos);
 
 
-	bool key(int key, bool keyboard = true);
+	bool keyUp(int keycode);
+	bool keyDown(int keycode);
+	bool keyPressed(int keycode);
 private:
 	int width;
 	int height;

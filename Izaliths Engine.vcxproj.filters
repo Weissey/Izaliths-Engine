@@ -19,6 +19,9 @@
     <Filter Include="Resource Files\imgui">
       <UniqueIdentifier>{d96b3569-348b-4036-96a8-12995c5cc392}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\models">
+      <UniqueIdentifier>{ce966b66-22ff-41a8-9c3f-e43435b3df31}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp">
@@ -53,9 +56,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\lib-vc2022\ImGUI\imgui_demo.cpp">
       <Filter>Resource Files\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="sprite.cpp">
-      <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
@@ -121,5 +121,21 @@
     <None Include="basic.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="LICENSE.txt" />
+    <Text Include="cube.obj">
+      <Filter>Resource Files\models</Filter>
+    </Text>
+    <Text Include="merc.obj">
+      <Filter>Resource Files\models</Filter>
+    </Text>
+    <Text Include="cat.obj">
+      <Filter>Resource Files\models</Filter>
+    </Text>
+    <Text Include="fish.obj">
+      <Filter>Resource Files\models</Filter>
+    </Text>
   </ItemGroup>
 </Project>
