@@ -101,19 +101,44 @@ struct Vec4 {
         this->z = z;
         this->c = c;
     }
+
+    Vec4<T>& operator+=(const Vec4<T>& other) {
+        this->x += other.x;
+        this->y += other.y;
+        this->z += other.z;
+        this->c += other.c;
+        return *this;
+    }
+
+    Vec4<T>& operator-=(const Vec4<T>& other) {
+        this->x -= other.x;
+        this->y -= other.y;
+        this->z -= other.z;
+        this->c -= other.c;
+        return *this;
+    }
+
+    Vec4<T>& operator*(const Vec4<T>& right)
+    {
+        this->x = this->x * right.x;
+        this->y = this->y * right.y;
+        this->z = this->z * right.z;
+        this->c = this->c * right.c;
+
+        return *this;
+    }
+
+    Vec4<T>& operator*(const float& right)
+    {
+        this->x = right * this->x;
+        this->y = right * this->y;
+        this->z = right * this->z;
+        this->c = right * this->c;
+
+        return *this;
+    }
 };
 
-template <typename T>
-Vec4<T> operator*(const Vec4<T>& left, const Vec4<T>& right)
-{
-    Vec4<T> result;
-    result.x = left.x * right.x;
-    result.y = left.y * right.y;
-    result.z = left.z * right.z;
-    result.c = left.c * right.c;
-
-    return result;
-}
 
 
 struct mat4 {

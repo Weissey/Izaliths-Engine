@@ -137,6 +137,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\aless\source\lib-vc2022\GLEW\Dependencies\x64;C:\Users\aless\source\lib-vc2022\GLFW\Dependencies;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <HeapReserveSize>10000000</HeapReserveSize>
+      <StackReserveSize>10000000</StackReserveSize>
+      <HeapCommitSize>40000</HeapCommitSize>
+      <StackCommitSize>40000</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

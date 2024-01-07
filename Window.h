@@ -11,7 +11,6 @@ class Window {
 public:
 	Window(int w_width, int w_height, const char* w_title, bool w_fullscreen_mode);
 	bool Update();
-	void render();
 
 	float g_width();
 	float g_height();
@@ -38,5 +37,4 @@ private:
 
 	bool m_Keys[MAX_KEYS];
 	bool m_MouseButtons[MAX_BUTTONS];
-	double mx, my;
 };

@@ -8,10 +8,7 @@
 
 Renderer::Renderer() {
 
-    //vertices = std::array<Vertex, MaxQuadCount>();
-    std::cerr << "Extraction failed.\n";
-    vertices.reserve(MaxQuadCount);
-    std::cerr << "Extraction failed.\n";
+    vertices.resize(MaxQuadCount);
 
     m_Shader = Shader::createShader("basic.vert", "basic.frag");
 
@@ -28,6 +25,9 @@ Renderer::Renderer() {
     glEnableVertexArrayAttrib(m_SpriteVB, 1);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, color));
 
+    glEnableVertexArrayAttrib(m_SpriteVB, 2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, normal));
+
     glCreateBuffers(1, &m_SpriteIB);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_SpriteIB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * MaxIndexCount, nullptr, GL_DYNAMIC_DRAW);
@@ -40,9 +40,17 @@ Sprite* Renderer::CreateSprite(std::string name, Vec3<float> position, Vec3<floa
 }
 
 Sprite* Renderer::LoadOBJ(std::string name, Vec3<float> position, Vec3<float> size, const char* filepath) {
-    Sprite* sprite = new Sprite(position, size, Vec4<float>(0, 0, 0, 0), name, filepath);
+    Sprite* sprite = new Sprite(position, size, Vec4<float>(0.1f, 1.0f, 0.1f, 1.0f), name, filepath);
     spriteList.push_back(sprite);
     return sprite;
+}
+
+void Renderer::setActiveCamera(Camera& camera) {
+    glUniformMatrix4fv(glGetUniformLocation(m_Shader->GetRendererID(), "vw_matrix"), 1, GL_FALSE, camera.render().elements);
+}
+
+void Renderer::setActiveCamera(FPScam& camera) {
+    glUniformMatrix4fv(glGetUniformLocation(m_Shader->GetRendererID(), "vw_matrix"), 1, GL_FALSE, camera.render().elements);
 }
 
 
@@ -50,15 +58,17 @@ void Renderer::render() {
 
     vertexCount = 0;
     indexCount = 0;
+
+    buffer = vertices.data();
+
     //ImguiCode();
 
-    //buffer = vertices.data();
-
     vertices.clear();
+    vertices.resize(MaxQuadCount);
+
 
     for (size_t i = 0; i < spriteList.size(); i++)
     {
-        
         addBuffers(spriteList[i]);
     }
 
@@ -93,14 +103,8 @@ void Renderer::addBuffers(const Sprite* sprite) {
         
         rotateVertex(vert, sprite->m_position, sprite->rotation_euler);
 
-        Vertex vertex;
-
-        color_p += i / 36.0f;
-
-        vertex.position.set(vert.x, vert.y, vert.z);
-        vertex.color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
-
-        vertices.push_back(vertex);
+        vertices.at(vertexCount).position.set(vert.x, vert.y, vert.z);
+        vertices.at(vertexCount).color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
 
         vertexCount += 1;
     }
@@ -119,6 +123,16 @@ void Renderer::addBuffers(const Sprite* sprite) {
 void Renderer::setUniformMat4(const GLchar* name, const mat4& matrix)
 {
     glUniformMatrix4fv(glGetUniformLocation(m_Shader->GetRendererID(), name), 1, GL_FALSE, matrix.elements);
+}
+
+void Renderer::setVec4(const GLchar* name, const Vec4<float>& color)
+{
+    glUniform4f(glGetUniformLocation(m_Shader->GetRendererID(), name), color.x, color.y, color.z, color.c);
+}
+
+void Renderer::setVec3(const GLchar* name, const Vec3<float>& color)
+{
+    glUniform3f(glGetUniformLocation(m_Shader->GetRendererID(), name), color.x, color.y, color.z);
 }
 
 void Renderer::ImguiCode() {
@@ -151,8 +165,8 @@ void Renderer::RotateCamera(Vec3<float> angles)
 void Renderer::rotateVertex(Vec3<float> &vertex, Vec3<float> center, Vec3<float> euler) {
 
     float roll = toRadians(euler.x);
-    float pitch = toRadians(euler.x);
-    float yaw = toRadians(euler.x);
+    float pitch = toRadians(euler.y);
+    float yaw = toRadians(euler.z);
 
     // Translate to the origin
     vertex.x -= center.x;

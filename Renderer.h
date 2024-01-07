@@ -5,6 +5,7 @@
 #include "Maths.h"
 #include <array>
 #include "sprite.h"
+#include "camera.h"
 
 
 
@@ -34,9 +35,15 @@ public:
 
 	Sprite* LoadOBJ(std::string name, Vec3<float> position, Vec3<float> size, const char* filepath);
 
+	void setActiveCamera(Camera& camera);
+	void setActiveCamera(FPScam& camera);
+
 
 	void setUniformMat4(const GLchar* name, const mat4& matrix);
+	void setVec4(const GLchar* name, const Vec4<float>& color);
+	void setVec3(const GLchar* name, const Vec3<float>& color);
 
+	void rotateVertex(Vec3<float>& vertex, Vec3<float> center, Vec3<float> euler);
 
 	Shader* m_Shader;
 	void render();
@@ -48,15 +55,6 @@ private:
 	GLuint m_SpriteVA;
 	GLuint m_SpriteVB;
 	GLuint m_SpriteIB;
-
-public:
-	void setCamera(Vec3<float> pos);
-	void TranslateCamera(Vec3<float> pos);
-	void RotateCamera(Vec3<float> angles);
-
-	Vec3<float> camera_pos;
-	Vec3<float> camera_rotation;
 	
-	void rotateVertex(Vec3<float>& vertex, Vec3<float> center, Vec3<float> euler);
 
 };

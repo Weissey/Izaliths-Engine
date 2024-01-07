@@ -69,7 +69,7 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
     glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     //glEnable(GL_MULTISAMPLE);
     glDepthFunc(GL_LESS);
 
@@ -111,9 +111,6 @@ bool Window::Update() {
     glfwDestroyWindow(window);
 
     return false;
-}
-
-void Window::render() {
 }
 
 float Window::g_width() {
@@ -164,5 +161,3 @@ bool Window::keyPressed(int keycode) { // fix
     return false;
 
 }
-
-//return glfwGetMouseButton(window, key) == GLFW_PRESS;
