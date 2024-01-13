@@ -19,7 +19,11 @@ public:
 
 	float currentTime = 0.0f;
 	float lastTime = glfwGetTime();
+	float lastoTime = glfwGetTime();
+
 	float f_deltaTime;
+
+	int nbFrames = 0;
 
 	Vec2<float> mPos();
 	void setmPos(Vec2<float> pos);
@@ -28,11 +32,16 @@ public:
 	bool keyUp(int keycode);
 	bool keyDown(int keycode);
 	bool keyPressed(int keycode);
+
+	void setBackgroundColor(float red, float green, float blue, float alpha);
 private:
 	int width;
 	int height;
 	const char* title;
 	bool fullscreen_mode;
+
+	Vec4<float> bg_color;
+
 	GLFWwindow* window;
 
 	bool m_Keys[MAX_KEYS];

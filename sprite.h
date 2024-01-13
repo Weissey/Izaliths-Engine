@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <glew.h>
 #include "Maths.h"
 #include <vector>
 #include <iostream>
@@ -7,9 +8,19 @@
 #include "Utils.h"
 
 struct Vertex {
+
 	Vec3<float> position;
 	Vec4<float> color;
 	Vec3<float> normal;
+};
+
+struct Transform {
+	Transform(float x, float y, float z, float a, float b, float c) {
+		this->position.set(x, y, z);
+		this->rotation.set(a, b, c);
+	}
+	Vec3<float> position;
+	Vec3<float> rotation;
 };
 
 
@@ -18,28 +29,50 @@ static struct Sprite {
 	std::string name;
 	std::string filepath;
 
-	Vec3<float> m_position;
-	Vec4<float> m_color;
-	Vec3<float> m_size;
-	Vec3<float> rotation_euler;
+	Vec3<GLfloat> m_position;
+	Vec4<GLfloat> m_color;
+	Vec3<GLfloat> m_size;
+	Vec3<GLfloat> rotation_euler;
 
+	bool isChanged = true;
 
 	std::vector<float> vertices {};
-
 	std::vector<uint32_t> indices{};
 
-	void setRotation(Vec3<float> euler) {
-		rotation_euler = euler;
+	std::vector<Vertex> out_vertices{};
+	std::vector<uint32_t> out_indices{};
+
+	std::vector<Transform> transformations{};
+
+	void setPosition(const Vec3<float>& pos) {
+		this->m_position = pos;
+		transformations.push_back(Transform(1, 2, 3, 4, 5, 6));
 	}
 
-	void rotate(Vec3<float> euler) {
+	void setRotation(const Vec3<float>& euler) {
+		this->rotation_euler = euler;
+		isChanged = true;
+	}
+
+	void rotate(const Vec3<float>& euler) {
 		rotation_euler.x += euler.x;
 		rotation_euler.y += euler.y;
 		rotation_euler.z += euler.z;
+		isChanged = true;
 	}
+
+	void translate(const Vec3<float>& pos) {
+		m_position.x += pos.x;
+		m_position.y += pos.y;
+		m_position.z += pos.z;
+		isChanged = true;
+	}
+
 
 	Sprite(Vec3<float> position, Vec3<float> size, Vec4<float> color, std::string name = "sprite", const char* filepath = "")
 		: m_position(position), m_color(color), m_size(size), name(name) {
+
+		isChanged = true;
 
 		if (filepath == "") {
 
@@ -181,10 +214,45 @@ static struct Sprite {
 
 
 		}
+
 	};
 
 
+	void rotateVertex(Vec3<float>& vertex, Vec3<float> center, Vec3<float> euler) {
 
+		float roll = toRadians(euler.x);
+		float pitch = toRadians(euler.y);
+		float yaw = toRadians(euler.z);
+
+		// Translate to the origin
+		vertex.x -= center.x;
+		vertex.y -= center.y;
+		vertex.z -= center.z;
+
+		// Apply rotation around X-axis (roll)
+		float tempY = cos(roll) * vertex.y - sin(roll) * vertex.z;
+		float tempZ = sin(roll) * vertex.y + cos(roll) * vertex.z;
+		vertex.y = tempY;
+		vertex.z = tempZ;
+
+		// Apply rotation around Y-axis (pitch)
+		float tempX = cos(pitch) * vertex.x + sin(pitch) * vertex.z;
+		tempZ = -sin(pitch) * vertex.x + cos(pitch) * vertex.z;
+		vertex.x = tempX;
+		vertex.z = tempZ;
+
+		// Apply rotation around Z-axis (yaw)
+		tempX = cos(yaw) * vertex.x - sin(yaw) * vertex.y;
+		tempY = sin(yaw) * vertex.x + cos(yaw) * vertex.y;
+		vertex.x = tempX;
+		vertex.y = tempY;
+
+		// Translate back to the original position
+		vertex.x += center.x;
+		vertex.y += center.y;
+		vertex.z += center.z;
+
+	}
 
 
 

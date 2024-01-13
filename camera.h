@@ -9,15 +9,15 @@ struct Camera {
 	Vec3<float> pos;
 	Vec3<float> euler;
 
-	Camera(Vec3<float> pos, Vec3<float> euler);
+	Camera(const Vec3<float>& pos, const Vec3<float>& euler);
 
-	void Translate(Vec3<float> pos);
+	void Translate(const Vec3<float>& pos);
 
-	void Rotate(Vec3<float> euler);
+	void Rotate(const Vec3<float>& euler);
 
-	void SetPosition(Vec3<float> pos);
+	void SetPosition(const Vec3<float>& pos);
 
-	void SetRotate(Vec3<float> euler);
+	void SetRotate(const Vec3<float>& euler);
 
 	mat4 render();
 };

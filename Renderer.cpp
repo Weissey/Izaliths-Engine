@@ -8,7 +8,10 @@
 
 Renderer::Renderer() {
 
-    vertices.resize(MaxQuadCount);
+    //vertices.resize(MaxQuadCount);
+
+    //vertices = new Vertex[MaxVertexCount];
+    //indices = new uint32_t[MaxIndexCount];
 
     m_Shader = Shader::createShader("basic.vert", "basic.frag");
 
@@ -33,6 +36,10 @@ Renderer::Renderer() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * MaxIndexCount, nullptr, GL_DYNAMIC_DRAW);
 }
 
+Renderer::~Renderer() {
+
+}
+
 Sprite* Renderer::CreateSprite(std::string name, Vec3<float> position, Vec3<float> size, Vec4<float> color) {
     Sprite* sprite = new Sprite(position, size, color, name);
     spriteList.push_back(sprite);
@@ -53,6 +60,10 @@ void Renderer::setActiveCamera(FPScam& camera) {
     glUniformMatrix4fv(glGetUniformLocation(m_Shader->GetRendererID(), "vw_matrix"), 1, GL_FALSE, camera.render().elements);
 }
 
+void Renderer::setProjectionMatrix(const mat4& matrix) {
+    glUniformMatrix4fv(glGetUniformLocation(m_Shader->GetRendererID(), "pr_matrix"), 1, GL_FALSE, matrix.elements);
+}
+
 
 void Renderer::render() {
 
@@ -63,58 +74,63 @@ void Renderer::render() {
 
     //ImguiCode();
 
-    vertices.clear();
-    vertices.resize(MaxQuadCount);
-
-
     for (size_t i = 0; i < spriteList.size(); i++)
     {
-        addBuffers(spriteList[i]);
+        if (spriteList[i]->isChanged == true) {
+            compileVertices(spriteList[i]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
+            glBufferSubData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), spriteList[i]->out_vertices.size() * sizeof(Vertex), spriteList[i]->out_vertices.data());
+
+            compileIndices(spriteList[i]);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_SpriteIB);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(uint32_t), spriteList[i]->out_indices.size() * sizeof(uint32_t), spriteList[i]->out_indices.data());
+            spriteList[i]->isChanged = false;
+        }
+
+        vertexCount += spriteList[i]->out_vertices.size();
+        indexCount += spriteList[i]->out_indices.size();
     }
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_SpriteIB);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indices), indices);
-
     glUseProgram(m_Shader->GetRendererID());
     glBindVertexArray(m_SpriteVA);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
 }
 
-void Renderer::addBuffers(const Sprite* sprite) {
-
-    int offset = vertexCount;
-
-    float color_p = 0.0f;
+void Renderer::compileVertices(Sprite* sprite)
+{
+    sprite->out_vertices.clear();
 
     for (size_t i = 0; i < sprite->vertices.size(); i += 3) {
 
-       Vec3<float> vert(sprite->vertices[i] * (sprite->m_size.x / 2) + sprite->m_position.x,
+        Vec3<float> vert(sprite->vertices[i + 0] * (sprite->m_size.x / 2) + sprite->m_position.x,
             sprite->vertices[i + 1] * (sprite->m_size.y / 2) + sprite->m_position.y,
             sprite->vertices[i + 2] * (sprite->m_size.z / 2) + sprite->m_position.z);
-        
+
         rotateVertex(vert, sprite->m_position, sprite->rotation_euler);
 
-        vertices.at(vertexCount).position.set(vert.x, vert.y, vert.z);
-        vertices.at(vertexCount).color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
+        Vertex vertex;
 
-        vertexCount += 1;
+        vertex.position.set(vert.x, vert.y, vert.z);
+        vertex.color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
+
+        sprite->out_vertices.push_back(vertex);
     }
+}
 
+void Renderer::compileIndices(Sprite* sprite) {
+
+    int offset = vertexCount;
+
+    sprite->out_indices.clear();
+        
     for (size_t i = 0; i < sprite->indices.size(); i += 3)
     {
-        indices[indexCount] = offset + sprite->indices[i];
-        indices[indexCount + 1] = offset + sprite->indices[i + 1];
-        indices[indexCount + 2] = offset + sprite->indices[i + 2];
-        indexCount += 3;
+        sprite->out_indices.push_back(offset + sprite->indices[i]);
+        sprite->out_indices.push_back(offset + sprite->indices[i + 1]);
+        sprite->out_indices.push_back(offset + sprite->indices[i + 2]);
     }
 
 
@@ -152,17 +168,7 @@ void Renderer::ImguiCode() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Renderer::TranslateCamera(Vec3<float> pos)
-{
-    setUniformMat4("vw_matrix", mat4::translation(pos));
-}
-
-void Renderer::RotateCamera(Vec3<float> angles)
-{
-    setUniformMat4("vw_matrix", mat4::rotation(angles));
-}
-
-void Renderer::rotateVertex(Vec3<float> &vertex, Vec3<float> center, Vec3<float> euler) {
+void Renderer::rotateVertex(Vec3<float> &vertex, const Vec3<float> &center, const Vec3<float> &euler) {
 
     float roll = toRadians(euler.x);
     float pitch = toRadians(euler.y);

@@ -2,28 +2,28 @@
 
 
 
-Camera::Camera(Vec3<float> pos, Vec3<float> euler)
+Camera::Camera(const Vec3<float>& pos, const Vec3<float>& euler)
 {
 	this->pos = pos;
 	this->euler = euler;
 }
 
-void Camera::Translate(Vec3<float> pos)
+void Camera::Translate(const Vec3<float>& pos)
 {
 	this->pos += pos;
 }
 
-void Camera::Rotate(Vec3<float> euler)
+void Camera::Rotate(const Vec3<float>& euler)
 {
 	this->euler += euler;
 }
 
-void Camera::SetPosition(Vec3<float> pos)
+void Camera::SetPosition(const Vec3<float>& pos)
 {
 	this->pos = pos;
 }
 
-void Camera::SetRotate(Vec3<float> euler)
+void Camera::SetRotate(const Vec3<float>& euler)
 {
 	this->euler = euler;
 }

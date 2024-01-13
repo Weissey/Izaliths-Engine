@@ -68,6 +68,10 @@ struct Vec3 {
         return *this;
     }
 
+    bool operator!=(const Vec3<T>& other) const {
+        return x != other.x || y != other.y || z != other.z;
+    }
+
 };
 
 

@@ -84,6 +84,8 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
+    bg_color.set(0.2f, 0.3f, 0.8f, 1.0f);
+    glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.c);
 }
 
 float Window::deltaTime() {
@@ -95,11 +97,24 @@ bool Window::Update() {
     glfwSwapBuffers(window);
     glfwPollEvents();
 
-    f_deltaTime = currentTime - lastTime;
-    lastTime = currentTime;
+
 
     if (!glfwWindowShouldClose(window)) {
+        f_deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
         currentTime = glfwGetTime();
+
+        nbFrames++;
+
+        if (currentTime - lastoTime >= 1.0) {
+            // Calculate frames per second and reset timer
+            double fps = double(nbFrames) / (currentTime - lastoTime);
+            printf("%f fps\n", fps);
+            nbFrames = 0;
+            lastoTime += 1.0;
+        }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         return true;
     }
@@ -160,4 +175,9 @@ bool Window::keyPressed(int keycode) { // fix
 
     return false;
 
+}
+
+void Window::setBackgroundColor(float red, float green, float blue, float alpha) {
+    this->bg_color.set(red, green, blue, alpha);
+    glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.c);
 }

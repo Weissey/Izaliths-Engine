@@ -18,6 +18,8 @@ void GLAPIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 int main() {
 
     Window window(1600, 1000, "Oolong", false);
+    //window.setBackgroundColor(1.0f, 0.0f, 0.0f, 1.0f);
+
 
     Renderer renderer;
 
@@ -25,24 +27,15 @@ int main() {
 
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
+    
 
     mat4 perspective = mat4::perspective(45.0f, 1200.0f / 900.0f, 0.1f, 100.0f);
     //glEnable(GL_DEBUG_OUTPUT);
     //glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     //glDebugMessageCallback(debugCallback, nullptr);
 
-    double lastTime = glfwGetTime();
-    int nbFrames = 0;
 
-    
     Sprite* cat = renderer.LoadOBJ("first", Vec3<float>(0.0f, 0.0f, 0.0f), Vec3<float>(20.0f, 20.0f, 20.0f), "cube.obj");
-
-    Sprite* cat1 = renderer.LoadOBJ("first", Vec3<float>(20.0f, 0.0f, 0.0f), Vec3<float>(20.0f, 20.0f, 20.0f), "cube.obj");
-
-    Sprite* cat2 = renderer.LoadOBJ("first", Vec3<float>(30.0f, 0.0f, 0.0f), Vec3<float>(20.0f, 20.0f, 20.0f), "cube.obj");
-
-    Sprite* cube = renderer.CreateSprite("first", Vec3<float>(10.0f, 0.0f, 0.0f), Vec3<float>(1.0f, 50.0f, 50.0f), Vec4<float>(1.0f, 1.0f, 0.0f, 1.0f));
     
     Vec3<float> x(-36.0f, 10.0f, -117.0f);
     Vec3<float> y(0.0f, 0.0f, 0.0f);
@@ -55,18 +48,14 @@ int main() {
 
     while (window.Update()) {
         renderer.render();
+        renderer.setProjectionMatrix(perspective); // high 90%
 
-        nbFrames++;
-
-        if (window.currentTime - lastTime >= 1.0) {
-            // Calculate frames per second and reset timer
-            double fps = double(nbFrames) / (window.currentTime - lastTime);
-            printf("%f fps\n", fps);
-
-            nbFrames = 0;
-            lastTime += 1.0;
+        for (size_t i = 0; i < renderer.spriteList.size(); i++)
+        {
+            renderer.spriteList[i]->setRotation(Vec3<float>(window.currentTime * 5.0f * i, window.currentTime * 5.0f * i, window.currentTime * 5.0f * i));
         }
 
+        //cat->setRotation(Vec3<float>(0.0f, window.currentTime * 5.0f, window.currentTime * 5.0f));
 
         if (window.keyPressed(GLFW_KEY_Q)) {
             fps_on = !fps_on;
@@ -74,12 +63,11 @@ int main() {
 
         if (window.keyPressed(GLFW_KEY_E)) {
 
-            Sprite* cat = renderer.LoadOBJ("first", Vec3<float>(window.currentTime * 15.0f, 0.0f, 0.0f), Vec3<float>(20.0f, 20.0f, 20.0f), "cube.obj");
+            Sprite* cat4 = renderer.LoadOBJ("first", Vec3<float>(window.currentTime * 9.0f, 0.0f, 0.0f), Vec3<float>(20.0f, 20.0f, 20.0f), "cube.obj");
             std::cout << renderer.vertexCount << std::endl;
             std::cout << renderer.spriteList.size() << std::endl;
         }
 
-        renderer.setUniformMat4("pr_matrix", perspective);
 
         if (fps_on) {
             renderer.setActiveCamera(fps);

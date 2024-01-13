@@ -19,17 +19,21 @@ public:
 
 
 	Renderer();
+	~Renderer();
+
 	uint32_t vertexCount = 0;
 	uint32_t indexCount = 0;
 
-	//std::array<Vertex, MaxQuadCount> vertices;
-	std::vector<Vertex> vertices;
-
+	std::array<Vertex, MaxQuadCount> vertices;
 	uint32_t indices[MaxIndexCount];
+
+	//Vertex* vertices;
+	//uint32_t* indices;
 
 	Vertex* buffer;
 
-	void addBuffers(const Sprite* sprite);
+	void compileVertices(Sprite* sprite);
+	void compileIndices(Sprite* sprite);
 
 	Sprite* CreateSprite(std::string name, Vec3<float> position, Vec3<float> size, Vec4<float> color);
 
@@ -38,12 +42,16 @@ public:
 	void setActiveCamera(Camera& camera);
 	void setActiveCamera(FPScam& camera);
 
+	std::vector<Transform> transformStack;
+
+	void setProjectionMatrix(const mat4& matrix);
+
 
 	void setUniformMat4(const GLchar* name, const mat4& matrix);
 	void setVec4(const GLchar* name, const Vec4<float>& color);
 	void setVec3(const GLchar* name, const Vec3<float>& color);
 
-	void rotateVertex(Vec3<float>& vertex, Vec3<float> center, Vec3<float> euler);
+	void rotateVertex(Vec3<float>& vertex, const Vec3<float>& center, const Vec3<float>& euler);
 
 	Shader* m_Shader;
 	void render();
