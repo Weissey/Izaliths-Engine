@@ -25,7 +25,8 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+    //glfwWindowHint(GLFW_SAMPLES, 4);
 
 
 
@@ -69,9 +70,9 @@ Window::Window(int w_width, int w_height, const char* w_title, bool w_fullscreen
     glViewport(0, 0, width, height);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
     //glEnable(GL_MULTISAMPLE);
-    glDepthFunc(GL_LESS);
+    //glDepthFunc(GL_LESS);
 
     //glDepthMask(GL_FALSE);
 
@@ -94,8 +95,6 @@ float Window::deltaTime() {
 }
 
 bool Window::Update() {
-    glfwSwapBuffers(window);
-    glfwPollEvents();
 
 
 
@@ -115,6 +114,9 @@ bool Window::Update() {
             lastoTime += 1.0;
         }
 
+        glClientWaitSync(fenceSync, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+        glfwPollEvents();
+        glfwSwapBuffers(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         return true;
     }

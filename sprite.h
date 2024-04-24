@@ -5,24 +5,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include "Vertex.h"
 #include "Utils.h"
-
-struct Vertex {
-
-	Vec3<float> position;
-	Vec4<float> color;
-	Vec3<float> normal;
-};
-
-struct Transform {
-	Transform(float x, float y, float z, float a, float b, float c) {
-		this->position.set(x, y, z);
-		this->rotation.set(a, b, c);
-	}
-	Vec3<float> position;
-	Vec3<float> rotation;
-};
-
 
 static struct Sprite {
 
@@ -39,25 +23,29 @@ static struct Sprite {
 	std::vector<float> vertices {};
 	std::vector<uint32_t> indices{};
 
+	std::vector<float> uvs {};
+
 	std::vector<Vertex> out_vertices{};
 	std::vector<uint32_t> out_indices{};
 
-	std::vector<Transform> transformations{};
-
 	void setPosition(const Vec3<float>& pos) {
 		this->m_position = pos;
-		transformations.push_back(Transform(1, 2, 3, 4, 5, 6));
-	}
-
-	void setRotation(const Vec3<float>& euler) {
-		this->rotation_euler = euler;
 		isChanged = true;
 	}
 
-	void rotate(const Vec3<float>& euler) {
-		rotation_euler.x += euler.x;
-		rotation_euler.y += euler.y;
-		rotation_euler.z += euler.z;
+	void setRotation(const Vec3<GLfloat>& euler) {
+		if (rotation_euler != euler) {
+			this->rotation_euler.x = customModulo(euler.x, 360.0f);
+			this->rotation_euler.y = customModulo(euler.y, 360.0f);
+			this->rotation_euler.z = customModulo(euler.z, 360.0f);
+			isChanged = true;
+		}
+	}
+
+	void rotate(const Vec3<GLfloat>& euler) {
+		this->rotation_euler.x = customModulo(this->rotation_euler.x + euler.x, 360.0f);
+		this->rotation_euler.y = customModulo(this->rotation_euler.y + euler.y, 360.0f);
+		this->rotation_euler.z = customModulo(this->rotation_euler.z + euler.z, 360.0f);
 		isChanged = true;
 	}
 
@@ -102,117 +90,71 @@ static struct Sprite {
 		}
 		else {
 
-			//printf("Loaded model data from %s\n", filepath);
+			printf("Loaded model data from %s\n", filepath);
 
 
-			FILE* file;
-			if (fopen_s(&file, filepath, "r") == 0) {
-
-
-				char buffer[1024];
-
-
-				while (fgets(buffer, sizeof(buffer), file) != nullptr) {
-					std::istringstream iss(buffer);
-
-					std::string token;
-					iss >> token;
-
-					// Check if the first token is "v"
-					if (token == "v") {
-						// Read the float values into variables
-						float x, y, z;
-						iss >> x >> y >> z;
-
-						// Check if extraction was successful
-						if (!iss.fail()) {
-							// Print the extracted values
-							//std::cout << "vert: " << x << " " << y << " " << z << "\n";
-							vertices.push_back(x);
-							vertices.push_back(y);
-							vertices.push_back(z);
-						}
-						else {
-							std::cerr << "Extraction failed.\n";
-						}
-					}
-
-					if (token == "f") {
-						// Read the float values into variables
-
-						char slash;
-
-						float face[3];
-
-						for (int n = 0; n < 3; n++)
-						{
-							float indice, y, z;
-
-							iss >> indice;
-
-							face[n] = indice;
-
-							//std::cout << "face: " << indice << " " << y << " " << z << "\n";
-
-							if (!iss.fail()) {
-								// Print the extracted values
-
-							}
-							else {
-								std::cerr << "Extraction failed.\n";
-							}
-						}
-						indices.push_back(face[0] - 1);
-						indices.push_back(face[1] - 1);
-						indices.push_back(face[2] - 1);
-					}
-				}
-
-				fclose(file);
-				std::cerr << "Model Loaded\n";
+			FILE* file = fopen(filepath, "r");
+			if (file == NULL) {
+				printf("Impossible to open the file !\n");
 			}
 			else {
-				printf("File cannot be opened\n");
-				// Handle the error
+				while (1) {
 
-				if (0 == "f") {
-					// Read the float values into variables
+					char lineHeader[128];
+					// read the first word of the line
+					int res = fscanf(file, "%s", lineHeader);
 
+					if (strcmp(lineHeader, "v") == 0) {
+						Vec3<float> vertex;
+						fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+						vertices.push_back(vertex.x);
+						vertices.push_back(vertex.y);
+						vertices.push_back(vertex.z);
 
-					float face[3];
+					}
+					else if (strcmp(lineHeader, "vt") == 0) {
+						Vec2<float> uv;
+						fscanf(file, "%f %f\n", &uv.x, &uv.y);
+						uvs.push_back(uv.x);
+						uvs.push_back(uv.y);
+					}
+					else if (strcmp(lineHeader, "f") == 0) {
+						std::string vertex1, vertex2, vertex3;
+						unsigned int vertexIndex[4], uvIndex[4], normalIndex[4];
+						int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d\n",
+							&vertexIndex[0], &uvIndex[0], &normalIndex[0],
+							&vertexIndex[1], &uvIndex[1], &normalIndex[1],
+							&vertexIndex[2], &uvIndex[2], &normalIndex[2],
+							&vertexIndex[3], &uvIndex[3], &normalIndex[3]);
 
-					for (int n = 0; n < 3; n++)
-					{
-						float indice, y, z;
-						char slash;
+						if (matches == 9) {
+							indices.push_back(vertexIndex[0] - 1);
+							indices.push_back(vertexIndex[1] - 1);
+							indices.push_back(vertexIndex[2] - 1);
+						}
+						else if (matches == 12) {
+							indices.push_back(vertexIndex[0] - 1);
+							indices.push_back(vertexIndex[1] - 1);
+							indices.push_back(vertexIndex[2] - 1);
 
-						//iss >> indice >> slash >> y >> slash >> z;
+							indices.push_back(vertexIndex[0] - 1);
+							indices.push_back(vertexIndex[2] - 1);
+							indices.push_back(vertexIndex[3] - 1);
+						}
 
-						//face[n] = indice;
-
-						//std::cout << n << " - face: " << indice << " " << y << " " << z << "\n";
-
-						//if (!iss.fail()) {
-						//	// Print the extracted values
-
-						//}
-						//else {
-						//	std::cerr << "Extraction failed.\n";
-						//}
+						//uvIndices.push_back(uvIndex[0]);
+						//uvIndices.push_back(uvIndex[1]);
+						//uvIndices.push_back(uvIndex[2]);
+						//normalIndices.push_back(normalIndex[0]);
+						//normalIndices.push_back(normalIndex[1]);
+						//normalIndices.push_back(normalIndex[2]);
 					}
 
-					indices.push_back(face[0]);
-					indices.push_back(face[1]);
-					indices.push_back(face[2]);
-
-					/*indices.push_back(face[0]);
-					indices.push_back(face[2]);
-					indices.push_back(face[3]);*/
+					if (res == EOF) {
+						break;
+					}
 				}
 			}
-
-
-
 		}
 
 	};

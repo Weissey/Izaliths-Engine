@@ -8,6 +8,10 @@ inline float toRadians(float degrees)
     return degrees * (M_PI / 180.0f);
 }
 
+inline float customModulo(float a, float b) {
+    return a - b * static_cast<int>(a / b);
+}
+
 template <typename T>
 struct Vec2 {
     T x, y;
@@ -43,6 +47,8 @@ struct Vec3 {
         return *this;
     }
 
+
+
     Vec3<T>& operator-=(const Vec3<T>& other) {
         this->x -= other.x;
         this->y -= other.y;
@@ -72,7 +78,30 @@ struct Vec3 {
         return x != other.x || y != other.y || z != other.z;
     }
 
+    bool operator==(const Vec3<T>& other) const {
+        return x == other.x && y == other.y && z == other.z;
+    }
+
+    template <typename U>
+    Vec3<U> convert() const {
+        return { static_cast<U>(x), static_cast<U>(y), static_cast<U>(z) };
+    }
+
+
 };
+
+template <typename U>
+Vec3<U> crossProduct(const Vec3<U>& vec1, const Vec3<U>& vec2) {
+
+    U x1 = vec1[0], y1 = vec1[1], z1 = vec1[2];
+    U x2 = vec2[0], y2 = vec2[1], z2 = vec2[2];
+
+    U cross_x = y1 * z2 - z1 * y2;
+    U cross_y = z1 * x2 - x1 * z2;
+    U cross_z = x1 * y2 - y1 * x2;
+
+    return Vec3<U>(cross_x, cross_y, cross_z);
+}
 
 
 template <typename T>

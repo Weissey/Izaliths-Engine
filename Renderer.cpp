@@ -1,17 +1,20 @@
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+
 #include "Renderer.h"
+#include <vector>
 #include <iostream>
+
+#include "FenceObject.h"
 
 
 
 Renderer::Renderer() {
 
-    //vertices.resize(MaxQuadCount);
+    m_SpriteIB = 0;
+    m_SpriteVA = 0;
+    m_SpriteVB = 0;
 
-    //vertices = new Vertex[MaxVertexCount];
-    //indices = new uint32_t[MaxIndexCount];
+    vertices = new Vertex[MaxVertexCount];
+    indices = new uint32_t[MaxIndexCount];
 
     m_Shader = Shader::createShader("basic.vert", "basic.frag");
 
@@ -37,7 +40,8 @@ Renderer::Renderer() {
 }
 
 Renderer::~Renderer() {
-
+    delete vertices;
+    delete indices;
 }
 
 Sprite* Renderer::CreateSprite(std::string name, Vec3<float> position, Vec3<float> size, Vec4<float> color) {
@@ -46,8 +50,8 @@ Sprite* Renderer::CreateSprite(std::string name, Vec3<float> position, Vec3<floa
     return sprite;
 }
 
-Sprite* Renderer::LoadOBJ(std::string name, Vec3<float> position, Vec3<float> size, const char* filepath) {
-    Sprite* sprite = new Sprite(position, size, Vec4<float>(0.1f, 1.0f, 0.1f, 1.0f), name, filepath);
+Sprite* Renderer::LoadOBJ(std::string name, Vec3<float> position, Vec3<float> size, const char* filepath, Vec4<float> color) {
+    Sprite* sprite = new Sprite(position, size, color, name, filepath);
     spriteList.push_back(sprite);
     return sprite;
 }
@@ -65,35 +69,86 @@ void Renderer::setProjectionMatrix(const mat4& matrix) {
 }
 
 
+
 void Renderer::render() {
+
+
+    num = 0;
+
+    last_num = 0;
+
+
+
+    //ImguiCode();
+
+    for (size_t i = 0; i < spriteList.size() - 1; ++i) {
+        for (size_t j = 0; j < spriteList.size() - i - 1; ++j) {
+            if (spriteList[j]->isChanged > spriteList[j + 1]->isChanged) {
+                // Swap the pointers if necessary
+                swapPointers(spriteList[j], spriteList[j + 1]);
+                num++;
+            }
+        }
+    }
 
     vertexCount = 0;
     indexCount = 0;
 
-    buffer = vertices.data();
+    int updateVertexCount = 0;
+    int updateIndiceCount = 0;
 
-    //ImguiCode();
+    startVertexIndex = 0;
+    startIndiceIndex = 0;
+
 
     for (size_t i = 0; i < spriteList.size(); i++)
     {
-        if (spriteList[i]->isChanged == true) {
+        //std::cout << i;
+        if (spriteList[i]->isChanged == true || num != 0) {
+
+            compileIndices(spriteList[i]); //if static do once
             compileVertices(spriteList[i]);
 
-            glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
-            glBufferSubData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), spriteList[i]->out_vertices.size() * sizeof(Vertex), spriteList[i]->out_vertices.data());
-
-            compileIndices(spriteList[i]);
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_SpriteIB);
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(uint32_t), spriteList[i]->out_indices.size() * sizeof(uint32_t), spriteList[i]->out_indices.data());
             spriteList[i]->isChanged = false;
+
+            updateVertexCount += spriteList[i]->vertices.size();
+            updateIndiceCount += spriteList[i]->indices.size();
+
+        }
+        else {
+            indexCount += spriteList[i]->indices.size();
+            vertexCount += spriteList[i]->vertices.size();
+
+            startVertexIndex += spriteList[i]->vertices.size();
+            startIndiceIndex += spriteList[i]->indices.size();
         }
 
-        vertexCount += spriteList[i]->out_vertices.size();
-        indexCount += spriteList[i]->out_indices.size();
     }
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (num != last_num) {
+        startVertexIndex = 0;
+        startIndiceIndex = 0;
+
+        updateVertexCount = vertexCount;
+        updateIndiceCount = indexCount;
+
+    }
+
+    last_num = num;
+
+    if (updateVertexCount != 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, m_SpriteVB);
+        glBufferSubData(GL_ARRAY_BUFFER, startVertexIndex * sizeof(Vertex), updateVertexCount * sizeof(Vertex), &vertices[startVertexIndex]);
+    }
+
+    if (updateIndiceCount != 0) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_SpriteIB);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, startIndiceIndex * sizeof(uint32_t), updateIndiceCount * sizeof(uint32_t), &indices[startIndiceIndex]);
+    }
+
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     glUseProgram(m_Shader->GetRendererID());
     glBindVertexArray(m_SpriteVA);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
@@ -101,39 +156,36 @@ void Renderer::render() {
 
 void Renderer::compileVertices(Sprite* sprite)
 {
-    sprite->out_vertices.clear();
 
     for (size_t i = 0; i < sprite->vertices.size(); i += 3) {
 
-        Vec3<float> vert(sprite->vertices[i + 0] * (sprite->m_size.x / 2) + sprite->m_position.x,
-            sprite->vertices[i + 1] * (sprite->m_size.y / 2) + sprite->m_position.y,
-            sprite->vertices[i + 2] * (sprite->m_size.z / 2) + sprite->m_position.z);
+        Vec3<float> vert(
+            sprite->vertices[i + 0] * (sprite->m_size.x * halfSizeFactor) + sprite->m_position.x,
+            sprite->vertices[i + 1] * (sprite->m_size.y * halfSizeFactor) + sprite->m_position.y,
+            sprite->vertices[i + 2] * (sprite->m_size.z * halfSizeFactor) + sprite->m_position.z
+        );
 
         rotateVertex(vert, sprite->m_position, sprite->rotation_euler);
 
-        Vertex vertex;
+        vertices[vertexCount].position.set(vert.x, vert.y, vert.z);
+        vertices[vertexCount].color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
 
-        vertex.position.set(vert.x, vert.y, vert.z);
-        vertex.color.set(sprite->m_color.x, sprite->m_color.y, sprite->m_color.z, sprite->m_color.c);
+        vertexCount += 1;
 
-        sprite->out_vertices.push_back(vertex);
     }
 }
 
 void Renderer::compileIndices(Sprite* sprite) {
 
     int offset = vertexCount;
-
-    sprite->out_indices.clear();
         
-    for (size_t i = 0; i < sprite->indices.size(); i += 3)
-    {
-        sprite->out_indices.push_back(offset + sprite->indices[i]);
-        sprite->out_indices.push_back(offset + sprite->indices[i + 1]);
-        sprite->out_indices.push_back(offset + sprite->indices[i + 2]);
+    for (size_t i = 0; i < sprite->indices.size(); i += 3) {
+
+        indices[indexCount] = (offset + sprite->indices[i]);
+        indices[indexCount + 1] = (offset + sprite->indices[i + 1]);
+        indices[indexCount + 2] = (offset + sprite->indices[i + 2]);
+        indexCount += 3;
     }
-
-
 }
 
 void Renderer::setUniformMat4(const GLchar* name, const mat4& matrix)
@@ -149,23 +201,6 @@ void Renderer::setVec4(const GLchar* name, const Vec4<float>& color)
 void Renderer::setVec3(const GLchar* name, const Vec3<float>& color)
 {
     glUniform3f(glGetUniformLocation(m_Shader->GetRendererID(), name), color.x, color.y, color.z);
-}
-
-void Renderer::ImguiCode() {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::Begin("Test");
-    ImGui::DragFloat("x pos", &spriteList[2]->rotation_euler.x, 1.0f, -1200.0f, 1200.0f);
-    ImGui::DragFloat("z pos", &spriteList[2]->rotation_euler.z, 0.1f, -1200.0f, 1200.0f);
-    ImGui::DragFloat("yaw", &spriteList[2]->rotation_euler.y, 0.1f, -360.0f, 360.0f);
-
-
-    ImGui::End();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Renderer::rotateVertex(Vec3<float> &vertex, const Vec3<float> &center, const Vec3<float> &euler) {

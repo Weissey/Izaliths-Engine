@@ -21,6 +21,8 @@ public:
 	float lastTime = glfwGetTime();
 	float lastoTime = glfwGetTime();
 
+	GLsync fenceSync;
+
 	float f_deltaTime;
 
 	int nbFrames = 0;

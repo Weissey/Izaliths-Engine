@@ -4,7 +4,6 @@
 #include "Window.h"
 #include "Renderer.h"
 #include "camera.h"
-#include <vector>
 
 
 void GLAPIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -34,8 +33,8 @@ int main() {
     //glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     //glDebugMessageCallback(debugCallback, nullptr);
 
-
-    Sprite* cat = renderer.LoadOBJ("first", Vec3<float>(0.0f, 0.0f, 0.0f), Vec3<float>(20.0f, 20.0f, 20.0f), "cube.obj");
+    Sprite* sprite0 = renderer.LoadOBJ("second", Vec3<float>(-300.0f, -50.0f, -400.0f), Vec3<float>(1.0f, 1.0f, 1.0f), "cat.obj");
+    Sprite* sprite1 = renderer.LoadOBJ("first", Vec3<float>(-100.0f, -50.0f, -400.0f), Vec3<float>(1.0f, 1.0f, 1.0f), "Container.obj");
     
     Vec3<float> x(-36.0f, 10.0f, -117.0f);
     Vec3<float> y(0.0f, 0.0f, 0.0f);
@@ -50,23 +49,16 @@ int main() {
         renderer.render();
         renderer.setProjectionMatrix(perspective); // high 90%
 
-        for (size_t i = 0; i < renderer.spriteList.size(); i++)
-        {
-            renderer.spriteList[i]->setRotation(Vec3<float>(window.currentTime * 5.0f * i, window.currentTime * 5.0f * i, window.currentTime * 5.0f * i));
-        }
-
-        //cat->setRotation(Vec3<float>(0.0f, window.currentTime * 5.0f, window.currentTime * 5.0f));
-
         if (window.keyPressed(GLFW_KEY_Q)) {
             fps_on = !fps_on;
         }
 
         if (window.keyPressed(GLFW_KEY_E)) {
 
-            Sprite* cat4 = renderer.LoadOBJ("first", Vec3<float>(window.currentTime * 9.0f, 0.0f, 0.0f), Vec3<float>(20.0f, 20.0f, 20.0f), "cube.obj");
-            std::cout << renderer.vertexCount << std::endl;
-            std::cout << renderer.spriteList.size() << std::endl;
+            sprite1->rotate(Vec3<float>(0.0f, 0.0f, 5.0f));
         }
+        
+        sprite1->rotate(Vec3<float>(0.0f, window.deltaTime() * 14.0f, 0.0f));
 
 
         if (fps_on) {

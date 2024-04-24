@@ -33,8 +33,8 @@ public:
 	Vec3<float> camera_pos;
 	Vec3<float> camera_look;
 
-	float movespeed = 20.0f;
-	float lookspeed = 40.0f;
+	float movespeed = 400.0f;
+	float lookspeed = 60.0f;
 
     mat4 render();
 
