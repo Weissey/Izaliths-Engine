@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "Renderer.h"
 #include "camera.h"
+#include "circleBuffer.h"
 
 
 void GLAPIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -45,9 +46,10 @@ int main() {
 
     bool fps_on = true;
 
+
     while (window.Update()) {
-        renderer.render();
         renderer.setProjectionMatrix(perspective); // high 90%
+        renderer.render();
 
         if (window.keyPressed(GLFW_KEY_Q)) {
             fps_on = !fps_on;
@@ -57,16 +59,12 @@ int main() {
 
             sprite1->rotate(Vec3<float>(0.0f, 0.0f, 5.0f));
         }
+
+        
+
         
         sprite1->rotate(Vec3<float>(0.0f, window.deltaTime() * 14.0f, 0.0f));
 
-
-        if (fps_on) {
-            renderer.setActiveCamera(fps);
-        }
-        else {
-            renderer.setActiveCamera(camera1);
-        }
 
     }
 

@@ -6,67 +6,48 @@
 #include <array>
 #include "sprite.h"
 #include "camera.h"
-
+#include "Buffer.h"
+#include "circleBuffer.h"
 
 
 class Renderer {
 
 public:
+	const GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT;
+
+
 	static const size_t MaxQuadCount = 100000;
 	static const size_t MaxVertexCount = MaxQuadCount * 4;
 	static const size_t MaxIndexCount = MaxQuadCount * 10;
 
-	const float halfSizeFactor = 0.5f;
+	uint32_t vertexCount = 0;
+	uint32_t indexCount = 0;
+
 
 	Renderer();
 	~Renderer();
 
-	uint32_t vertexCount = 0;
-	uint32_t indexCount = 0;
+	uint32_t numBuffers = 3;
+	uint32_t TbufferIndex = 0;
+	circularBuffer<Buffer>* circleBuffer;
+
+	std::vector<Sprite*> sprites;
 
 	Vertex* vertices;
 	uint32_t* indices;
+	GLuint vao;
 
-	int startVertexIndex = 0;
-	int startIndiceIndex = 0;
-
-	void swapPointers(Sprite*& a, Sprite*& b) {
-		Sprite* temp = a;
-		a = b;
-		b = temp;
-	};
-
-	void compileVertices(Sprite* sprite);
-	void compileIndices(Sprite* sprite);
-
-	Sprite* CreateSprite(std::string name, Vec3<float> position, Vec3<float> size, Vec4<float> color);
-
-	Sprite* LoadOBJ(std::string name, Vec3<float> position, Vec3<float> size, const char* filepath, Vec4<float> color = Vec4<float>(0.1f, 1.0f, 0.1f, 1.0f));
-
-	void setActiveCamera(Camera& camera);
-	void setActiveCamera(FPScam& camera);
+	Shader* m_Shader;
 
 	void setProjectionMatrix(const mat4& matrix);
 
-	void setUniformMat4(const GLchar* name, const mat4& matrix);
-	void setVec4(const GLchar* name, const Vec4<float>& color);
-	void setVec3(const GLchar* name, const Vec3<float>& color);
+	void initBuffer();
 
-	void rotateVertex(Vec3<float>& vertex, const Vec3<float>& center, const Vec3<float>& euler);
+	void updateBuffer(int bufferIndex);
+	void mapBuffer(int bufferIndex);
+	void unmapBuffer(int bufferIndex);
 
-	Shader* m_Shader;
+	Sprite* LoadOBJ(std::string name, Vec3<float> position, Vec3<float> size, const char* filepath);
+
 	void render();
-	
-	std::vector<Sprite*> spriteList;
-
-	int num = 0;
-	int last_num = 0;
-
-private:
-	void ImguiCode();
-	GLuint m_SpriteVA;
-	GLuint m_SpriteVB;
-	GLuint m_SpriteIB;
-	
-
 };

@@ -134,6 +134,12 @@
     <ClInclude Include="Planet.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="circleBuffer.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.vert">
